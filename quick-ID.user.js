@@ -2,7 +2,7 @@
 // @name        quick-ID
 // @namespace   quick-ID
 // @match       *://*/*
-// @version     2.0.0
+// @version     2.1.0
 //
 // @downloadURL https://github.com/BBBaden-Moodle-userscripts/quick-ID/raw/main/quick-ID.user.js
 // @updateURL   https://github.com/BBBaden-Moodle-userscripts/quick-ID/raw/main/quick-ID.user.js
@@ -16,73 +16,56 @@
 //
 // @grant       GM_getValue
 // @run-at      document-end
+// @require     https://github.com/BBBaden-Moodle-userscripts/404PageBuilder/raw/main/404PageBuilder.lib.user.js
 // ==/UserScript==
 
-
-const baseURL = "https://moodle.bbbaden.ch/course/view.php?id=";
-
-// ######################### READ CONFIG #########################
-// function to read a variable from storage with default value and type check
-function readVariableFromStorageWithDefault(variableName, defaultValue, expectedType) {
-    try {
-        const storedValue = GM_getValue(variableName, defaultValue);
-        console.debug(`%c[VALUE]%c read value of %c${variableName}%c from storage: %c${storedValue}`, 'color: purple;', 'color: inherit;', 'color: blue;', 'color: inherit;', 'color: green');
+(function() {
+    'use strict';
 
 
-        if (typeof storedValue !== 'undefined' && typeof storedValue === expectedType) {
-            return storedValue;
+    const baseURL = "https://moodle.bbbaden.ch/course/view.php?id=";
+
+    // Read values directly from storage
+    const makeRequests = GM_getValue("makeRequests", false);
+    const keycode = GM_getValue("keycode", 69);
+
+    // Function to check if a URL is available
+    function isUrlAvailable(url) {
+        if (makeRequests) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('HEAD', url, false);
+            xhr.send();
+            return xhr.status !== 404;
         } else {
-            console.warn(`%c[VALUE]%c ${variableName} %cis not defined or does not match the expected type (%c${expectedType}%c) in storage.`, 'color: purple;', 'color: blue;', 'color: inherit;', 'color: red', 'color: inherit;');
-            return defaultValue; // Return the default value if it's not defined or doesn't match the expected type
-        }
-
-    } catch (error) {
-        console.error(`%c[VALUE]%c An error occurred while trying to retrieve %c${variableName}%c value from storage: %c${error}`, 'color: purple;', 'color: inherit;', 'color: blue;', 'color: inherit;', 'color: red;');
-        return defaultValue; // Return the default value in case of an error
-    }
-}
-
-
-const makeRequests = readVariableFromStorageWithDefault("makeRequests", false, "boolean");
-const keycode = readVariableFromStorageWithDefault("keycode", 69, "number");
-
-
-
-// Function to check if a URL is available
-function isUrlAvailable(url) {
-    if(makeRequests){
-        var xhr = new XMLHttpRequest();
-        xhr.open('HEAD', url, false);
-        xhr.send();
-        return xhr.status !== 404;
-    } else {
-        return true;
-    }
-}
-
-
-function promptURL (){
-    var id = prompt("Kurs ID eingeben", "");
-    if(id != null || id != undefined){
-        const newURL = baseURL + id;
-        if(isUrlAvailable(newURL)){
-            window.location = newURL;
-        } else {
-            alert("website nicht verfügbar\nURL: " + newURL);
+            return true;
         }
     }
 
-}
-
-function onAltE() {
-    promptURL();
-}
-
-function onKeydown(evt) {
-    // Use https://keycode.info/ to get keys
-    if (evt.altKey && evt.keyCode == keycode) {
-        onAltE();
+    function promptURL() {
+        var id = prompt("Kurs ID eingeben", "");
+        if (id != null || id != undefined) {
+            const newURL = baseURL + id;
+            if (isUrlAvailable(newURL)) {
+                window.location = newURL;
+            } else {
+                alert("website nicht verfügbar\nURL: " + newURL);
+            }
+        }
     }
-}
 
-document.addEventListener('keydown', onKeydown, true);
+    function onAltE(evt) {
+        if (evt.altKey && evt.key === 'e') {
+            promptURL();
+        }
+    }
+
+    document.addEventListener('keydown', onAltE, true);
+
+    // Check for configuration page
+    if (window.location.href === 'https://moodle.bbbaden.ch/userscript/config') {
+        PageBuilder.addElement("h1", 'Quick ID');
+        PageBuilder.addTextField("letterInput");
+        PageBuilder.addButton("button name", "const letter = document.getElementById('letterInput').value.charAt(0); const keycode = letter.charCodeAt(0); console.log('Keycode for \\'' + letter + '\\': ' + keycode);");
+        PageBuilder.addLine();
+    }
+})();
