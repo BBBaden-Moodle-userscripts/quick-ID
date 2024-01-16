@@ -15,46 +15,41 @@
 // @icon        https://github.com/BBBaden-Moodle-userscripts/quick-ID/raw/main/icon.svg
 //
 // @grant       GM_getValue
+// @grant       GM_setValue
 // @run-at      document-end
 // @require     https://github.com/BBBaden-Moodle-userscripts/404PageBuilder/raw/main/404PageBuilder.lib.user.js
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
-
 
     const baseURL = "https://moodle.bbbaden.ch/course/view.php?id=";
 
-    // Read values directly from storage
-    const makeRequests = GM_getValue("makeRequests", false);
-    const keycode = GM_getValue("keycode", 69);
+    // Set default value if not exists in local storage
+    const savedLetter = GM_getValue("savedLetter", "e");
 
     // Function to check if a URL is available
     function isUrlAvailable(url) {
-        if (makeRequests) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('HEAD', url, false);
-            xhr.send();
-            return xhr.status !== 404;
-        } else {
-            return true;
-        }
+        var xhr = new XMLHttpRequest();
+        xhr.open('HEAD', url, false);
+        xhr.send();
+        return xhr.status !== 404;
     }
 
     function promptURL() {
         var id = prompt("Kurs ID eingeben", "");
-        if (id != null || id != undefined) {
+        if (id != null && id !== "") {
             const newURL = baseURL + id;
             if (isUrlAvailable(newURL)) {
                 window.location = newURL;
             } else {
-                alert("website nicht verfügbar\nURL: " + newURL);
+                alert("Website nicht verfügbar\nURL: " + newURL);
             }
         }
     }
 
     function onAltE(evt) {
-        if (evt.altKey && evt.key === 'e') {
+        if (evt.altKey && evt.key === savedLetter) {
             promptURL();
         }
     }
@@ -65,7 +60,16 @@
     if (window.location.href === 'https://moodle.bbbaden.ch/userscript/config') {
         PageBuilder.addElement("h1", 'Quick ID');
         PageBuilder.addTextField("letterInput");
-        PageBuilder.addButton("button name", "const letter = document.getElementById('letterInput').value.charAt(0); const keycode = letter.charCodeAt(0); console.log('Keycode for \\'' + letter + '\\': ' + keycode);");
+        PageBuilder.addButton("Save Letter", `
+            const letterInput = document.getElementById('letterInput');
+            const letter = letterInput.value.charAt(0);
+            GM_setValue("savedLetter", letter);
+            console.log('Letter saved: ' + letter);
+            location.reload();
+        `);
         PageBuilder.addLine();
+
+        var letterInput = document.getElementById("letterInput");
+        letterInput.value = savedLetter;
     }
 })();
