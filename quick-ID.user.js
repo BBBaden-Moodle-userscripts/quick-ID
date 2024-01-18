@@ -56,6 +56,9 @@
 
     document.addEventListener('keydown', onAltE, true);
 
+    /* 
+        logic for BBBUserScriptManager
+    */
     // Check for configuration page
     if (window.location.href === 'https://moodle.bbbaden.ch/userscript/config') {
         PageBuilder.addElement("h1", 'Quick ID');
