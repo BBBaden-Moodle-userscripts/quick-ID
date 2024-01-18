@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name        quick-ID
 // @namespace   quick-ID
-// @match       *://*/*
-// @version     2.1.0
+// @match       *://moodle.bbbaden.ch/*
+// @version     2.1.1
 //
 // @downloadURL https://github.com/BBBaden-Moodle-userscripts/quick-ID/raw/main/quick-ID.user.js
 // @updateURL   https://github.com/BBBaden-Moodle-userscripts/quick-ID/raw/main/quick-ID.user.js
