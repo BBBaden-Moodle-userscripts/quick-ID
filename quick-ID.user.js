@@ -2,7 +2,7 @@
 // @name        quick-ID
 // @namespace   quick-ID
 // @match       *://moodle.bbbaden.ch/*
-// @version     2.1.1
+// @version     2.2.0
 //
 // @downloadURL https://github.com/BBBaden-Moodle-userscripts/quick-ID/raw/main/quick-ID.user.js
 // @updateURL   https://github.com/BBBaden-Moodle-userscripts/quick-ID/raw/main/quick-ID.user.js
@@ -14,9 +14,11 @@
 //
 // @icon        https://github.com/BBBaden-Moodle-userscripts/quick-ID/raw/main/icon.svg
 //
+// @grant       GM_info
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @run-at      document-end
+// @require     https://github.com/black-backdoor/DataBridge/raw/main/DataBridge.lib.user.js
 // @require     https://github.com/BBBaden-Moodle-userscripts/404PageBuilder/raw/main/404PageBuilder.lib.user.js
 // ==/UserScript==
 
@@ -56,9 +58,8 @@
 
     document.addEventListener('keydown', onAltE, true);
 
-    /* 
-        logic for BBBUserScriptManager
-    */
+    
+    //####################### BBBUserScriptManager #######################
     // Check for configuration page
     if (window.location.href === 'https://moodle.bbbaden.ch/userscript/config') {
         PageBuilder.addElement("h1", 'Quick ID');
@@ -75,4 +76,25 @@
         var letterInput = document.getElementById("letterInput");
         letterInput.value = savedLetter;
     }
+
+    //------------------------ DataBridge ------------------------
+    // Create a new DataBridge
+    const UserScriptManagerCon = new Connection("BBBUserScriptManager");
+
+    // Register an event listener for the extensionInstalled event
+    Protocol.registerMessageType(UserScriptManagerCon, 'getInstalled', function (msg) {
+        UserScriptManagerCon.send({
+            "header": {
+                "receiver": msg.header.sender,
+                "protocolVersion": "1.0",
+                "messageType": "extensionInstalled",
+            },
+            "body": {
+                "script": {
+                    "scriptName": GM_info.script.name,
+                    "scriptVersion": GM_info.script.version,
+                }
+            }
+        });
+    });
 })();
