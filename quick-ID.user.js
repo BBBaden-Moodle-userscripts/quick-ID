@@ -2,9 +2,8 @@
 // @name        quick-ID
 // @namespace   quick-ID
 // @match       *://moodle.bbbaden.ch/*
-// @version     2.2.0
+// @version     2.3.0
 //
-// @downloadURL https://github.com/BBBaden-Moodle-userscripts/quick-ID/raw/main/quick-ID.user.js
 // @updateURL   https://github.com/BBBaden-Moodle-userscripts/quick-ID/raw/main/quick-ID.user.js
 // @homepageURL https://github.com/BBBaden-Moodle-userscripts/quick-ID
 // @supportURL  https://github.com/BBBaden-Moodle-userscripts/quick-ID/issues
@@ -18,8 +17,6 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @run-at      document-end
-// @require     https://github.com/black-backdoor/DataBridge/raw/main/DataBridge.lib.user.js
-// @require     https://github.com/BBBaden-Moodle-userscripts/404PageBuilder/raw/main/404PageBuilder.lib.user.js
 // ==/UserScript==
 
 (function () {
@@ -45,56 +42,16 @@
             if (isUrlAvailable(newURL)) {
                 window.location = newURL;
             } else {
-                alert("Website nicht verfügbar\nURL: " + newURL);
+                alert("Webseite nicht verfügbar\nURL: " + newURL);
             }
         }
     }
 
-    function onAltE(evt) {
+    function onAltKey(evt) {
         if (evt.altKey && evt.key === savedLetter) {
             promptURL();
         }
     }
 
-    document.addEventListener('keydown', onAltE, true);
-
-    
-    //####################### BBBUserScriptManager #######################
-    // Check for configuration page
-    if (window.location.href === 'https://moodle.bbbaden.ch/userscript/config') {
-        PageBuilder.addElement("h1", 'Quick ID');
-        PageBuilder.addTextField("letterInput");
-        PageBuilder.addButton("Save Letter", `
-            const letterInput = document.getElementById('letterInput');
-            const letter = letterInput.value.charAt(0);
-            GM_setValue("savedLetter", letter);
-            console.log('Letter saved: ' + letter);
-            location.reload();
-        `);
-        PageBuilder.addLine();
-
-        var letterInput = document.getElementById("letterInput");
-        letterInput.value = savedLetter;
-    }
-
-    //------------------------ DataBridge ------------------------
-    // Create a new DataBridge
-    const UserScriptManagerCon = new Connection("BBBUserScriptManager");
-
-    // Register an event listener for the extensionInstalled event
-    Protocol.registerMessageType(UserScriptManagerCon, 'getInstalled', function (msg) {
-        UserScriptManagerCon.send({
-            "header": {
-                "receiver": msg.header.sender,
-                "protocolVersion": "1.0",
-                "messageType": "extensionInstalled",
-            },
-            "body": {
-                "script": {
-                    "scriptName": GM_info.script.name,
-                    "scriptVersion": GM_info.script.version,
-                }
-            }
-        });
-    });
+    document.addEventListener('keydown', onAltKey, true);
 })();
