@@ -30,13 +30,13 @@
     // Initialize bridge connection for userscript manager
     const connection = new Script();
     Logger.success('quickid', 'Bridge connection initialized');
-    
+
     // If on extensions page, only initialize bridge and return
     if (window.location.href === 'https://moodle.bbbaden.ch/userscript/extensions') {
-        Logger.info('startpage', 'On extensions page - bridge only mode');
+        Logger.info('quickid', 'On extensions page - bridge only mode');
         return;
     }
-    
+
     const baseURL = "https://moodle.bbbaden.ch/course/view.php?id=";
 
     // Set default value if not exists in local storage
